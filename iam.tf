@@ -14,19 +14,19 @@ data "aws_iam_policy_document" "role_trust" {
     principals {
       type = "AWS"
 
-      identifiers = ["${var.trusted_roles}"]
+      identifiers = var.trusted_roles
     }
   }
 }
 
 resource "aws_iam_role" "default" {
-  name               = "${module.label.id}"
-  assume_role_policy = "${data.aws_iam_policy_document.role_trust.json}"
+  name               = module.label.id
+  assume_role_policy = data.aws_iam_policy_document.role_trust.json
 }
 
 resource "aws_iam_policy" "default" {
-  name   = "${module.label.id}"
-  policy = "${data.aws_iam_policy_document.log_agent.json}"
+  name   = module.label.id
+  policy = data.aws_iam_policy_document.log_agent.json
 }
 
 data "aws_iam_policy_document" "log_agent" {
@@ -45,22 +45,21 @@ data "aws_iam_policy_document" "log_agent" {
     ]
 
     resources = [
-      "${aws_cloudwatch_log_group.default.arn}",
+      aws_cloudwatch_log_group.default.arn,
     ]
   }
 
   statement {
-    actions = [
-      "${var.additional_permissions}",
-    ]
+    actions = var.additional_permissions
 
     resources = [
-      "${aws_cloudwatch_log_group.default.arn}",
+      aws_cloudwatch_log_group.default.arn,
     ]
   }
 }
 
 resource "aws_iam_role_policy_attachment" "default" {
-  role       = "${aws_iam_role.default.name}"
-  policy_arn = "${aws_iam_policy.default.arn}"
+  role       = aws_iam_role.default.name
+  policy_arn = aws_iam_policy.default.arn
 }
+
